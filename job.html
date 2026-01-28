@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Создать вакансию</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #000);
+            transition: all 0.2s ease;
+        }
+        .card {
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 16px;
+        }
+        .input-custom {
+            background-color: var(--tg-theme-bg-color, #f0f0f0);
+            border: 1px solid rgba(0,0,0,0.1);
+            color: var(--tg-theme-text-color, #000);
+        }
+        .btn-main {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-10">
+    <div class="p-4 max-w-lg mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-xl font-bold">Оформление вакансии</h1>
+            <p class="text-sm opacity-60">Заполните детали предложения</p>
+        </header>
+
+        <div class="card p-5 shadow-sm space-y-5">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-70">Должность</label>
+                <input id="title" type="text" placeholder="Напр: Продавец-консультант" 
+                    class="input-custom w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-70">Описание и условия</label>
+                <textarea id="description" rows="6" placeholder="График, зарплата, требования..." 
+                    class="input-custom w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                <div class="mt-2 flex items-center text-amber-500 text-[10px] font-bold uppercase">
+                    <span>⚠️ Без ссылок и юзернеймов в этом поле</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-70">Ваши контакты</label>
+                <input id="contact" type="text" placeholder="@username или телефон" 
+                    class="input-custom w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-[10px] mt-1 opacity-50">Будут видны только после оплаты отклика</p>
+            </div>
+        </div>
+
+        <button id="mainButton" class="btn-main w-full mt-8 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-[0.98] transition-all">
+            Опубликовать (150₽)
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const titleInput = document.getElementById('title');
+        const descInput = document.getElementById('description');
+        const contactInput = document.getElementById('contact');
+        const btn = document.getElementById('mainButton');
+
+        btn.onclick = () => {
+            const title = titleInput.value.trim();
+            const desc = descInput.value.trim();
+            const contact = contactInput.value.trim();
+
+            if (!title || !desc || !contact) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Пожалуйста, заполните все поля формы.',
+                    buttons: [{type: 'ok'}]
+                });
+                return;
+            }
+
+            // Валидация на контакты в описании
+            const forbidden = /(@[a-zA-Z0-9_]+|t\.me\/|https?:\/\/|\+?[78][-\s]?\(?\d{3}\)?)/i;
+            if (forbidden.test(title) || forbidden.test(desc)) {
+                tg.showPopup({
+                    title: 'Внимание',
+                    message: 'В названии и описании нельзя оставлять контакты. Используйте для этого специальное поле "Ваши контакты".',
+                    buttons: [{type: 'ok'}]
+                });
+                return;
+            }
+
+            const result = {
+                title: title,
+                description: desc,
+                contact: contact
+            };
+
+            tg.sendData(JSON.stringify(result));
+            tg.close();
+        };
+    </script>
+</body>
+</html>
