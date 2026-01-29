@@ -2,71 +2,228 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Создать вакансию</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Создать объявление</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f0f2f5);
+            --text-color: var(--tg-theme-text-color, #1f2937);
+            --hint-color: var(--tg-theme-hint-color, #9ca3af);
+            --button-color: var(--tg-theme-button-color, #3b82f6);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+        }
+
+        /* Скрытие ползунков прокрутки */
+        * {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
         body {
-            background-color: var(--tg-theme-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #000);
-            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden; 
+            position: relative;
+            width: 100vw;
+            height: 100vh;
         }
-        .card {
-            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 16px;
+
+        /* Анимированный фон */
+        .blob {
+            position: absolute;
+            filter: blur(60px);
+            z-index: -1;
+            opacity: 0.8;
+            will-change: transform;
+            animation: move 12s infinite alternate ease-in-out;
         }
+        .blob-1 {
+            top: -5%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #60a5fa 0%, #3b82f6 100%);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        }
+        .blob-2 {
+            bottom: -5%;
+            right: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #818cf8 0%, #6366f1 100%);
+            border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+            animation-duration: 18s;
+            animation-delay: -2s;
+        }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(40px, 60px) scale(1.1) rotate(20deg); }
+            66% { transform: translate(-20px, 40px) scale(0.9) rotate(-10deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .glass-card {
+                background: rgba(28, 28, 30, 0.75);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .input-custom {
-            background-color: var(--tg-theme-bg-color, #f0f0f0);
-            border: 1px solid rgba(0,0,0,0.1);
-            color: var(--tg-theme-text-color, #000);
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 1.5px solid transparent;
+            transition: all 0.3s ease;
         }
-        .btn-main {
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
+
+        @media (prefers-color-scheme: dark) {
+            .input-custom {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
         }
+
+        .input-custom:focus {
+            border-color: var(--button-color);
+            background-color: var(--secondary-bg);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Улучшенная интерактивная кнопка */
+        .btn-premium {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Эффект наведения на десктопе */
+        @media (hover: hover) {
+            .btn-premium:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 25px rgba(37, 99, 235, 0.45);
+                filter: brightness(1.1);
+            }
+        }
+
+        /* Эффект нажатия */
+        .btn-premium:active {
+            transform: scale(0.95) translateY(0);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+            filter: brightness(0.9);
+        }
+
+        /* Световой блик */
+        .btn-premium::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: all 0.6s;
+        }
+
+        .btn-premium:hover::after {
+            left: 150%;
+        }
+
     </style>
 </head>
-<body class="antialiased min-h-screen pb-10">
-    <div class="p-4 max-w-lg mx-auto">
-        <header class="text-center mb-6">
-            <h1 class="text-xl font-bold">Оформление вакансии</h1>
-            <p class="text-sm opacity-60">Заполните детали предложения</p>
+<body class="min-h-screen flex flex-col items-center">
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="w-full max-w-md relative z-10 overflow-y-auto h-full px-4 py-8">
+        
+        <header class="text-center mb-6 fade-in-up">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/60 backdrop-blur-md shadow-sm mb-4 border border-white/50">
+                <span class="text-4xl">✨</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Новое объявление</h1>
+            <p class="text-sm font-medium opacity-50 mt-1">Заполните детали для публикации</p>
         </header>
 
-        <div class="card p-5 shadow-sm space-y-5">
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-70">Должность</label>
-                <input id="title" type="text" placeholder="Например: Продавец-консультант" 
-                    class="input-custom w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="glass-card rounded-[2.5rem] p-7 space-y-6 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold uppercase tracking-[0.1em] opacity-50 ml-1">Что вы предлагаете?</label>
+                <input id="title" type="text" placeholder="Например: Продам iPhone 15" 
+                    class="input-custom w-full py-4 px-5 rounded-2xl outline-none font-semibold text-lg">
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-70">Описание и условия</label>
-                <textarea id="description" rows="6" placeholder="График, зарплата, требования..." 
-                    class="input-custom w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                <div class="mt-2 flex items-center text-amber-500 text-[10px] font-bold uppercase">
-                    <span>⚠️ Без ссылок и юзернеймов в этом поле</span>
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold uppercase tracking-[0.1em] opacity-50 ml-1">Описание</label>
+                <textarea id="description" rows="4" placeholder="Опишите подробности, цену и состояние..." 
+                    class="input-custom w-full py-4 px-5 rounded-2xl outline-none font-medium text-base resize-none"></textarea>
+                
+                <div class="flex items-start p-3 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50">
+                    <span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 leading-tight">
+                        ⚡ Не пишите контакты здесь, для этого есть отдельное поле ниже.
+                    </span>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-2 opacity-70">Ваши контакты</label>
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold uppercase tracking-[0.1em] opacity-50 ml-1">Ваша связь</label>
                 <input id="contact" type="text" placeholder="@username или телефон" 
-                    class="input-custom w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <p class="text-[10px] mt-1 opacity-50">Будут видны только после отклика</p>
+                    class="input-custom w-full py-4 px-5 rounded-2xl outline-none font-semibold text-lg">
             </div>
         </div>
 
-        <button id="mainButton" class="btn-main w-full mt-8 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-[0.98] transition-all">
-            Продолжить 
+        <!-- Улучшенная кнопка -->
+        <button id="mainButton" class="fade-in-up btn-premium w-full mt-8 py-5 rounded-[2rem] font-bold text-lg text-white flex items-center justify-center group" style="animation-delay: 0.2s;">
+            <span class="relative z-10">Опубликовать</span>
+            <svg class="w-5 h-5 ml-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
         </button>
+        
+        <div class="text-center mt-8 pb-10 opacity-20 fade-in-up" style="animation-delay: 0.3s;">
+            <p class="text-[10px] font-black uppercase tracking-[0.3em]">ВСЕ НУЖНОЕ В ЛНР</p>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
+        tg.enableClosingConfirmation();
+
+        tg.setHeaderColor('secondary_bg_color');
+        tg.setBackgroundColor('bg_color');
 
         const titleInput = document.getElementById('title');
         const descInput = document.getElementById('description');
@@ -74,42 +231,34 @@
         const btn = document.getElementById('mainButton');
 
         btn.onclick = () => {
+            tg.HapticFeedback.impactOccurred('medium');
             const title = titleInput.value.trim();
             const desc = descInput.value.trim();
             const contact = contactInput.value.trim();
 
             if (!title || !desc || !contact) {
                 tg.showPopup({
-                    title: 'Ошибка',
-                    message: 'Пожалуйста, заполните все поля формы.',
-                    buttons: [{type: 'ok'}]
+                    title: 'Заполните форму',
+                    message: 'Все поля обязательны для публикации вашего объявления.',
+                    buttons: [{type: 'ok', text: 'Понятно'}]
                 });
                 return;
             }
 
-            // Валидация на контакты в описании
             const forbidden = /(@[a-zA-Z0-9_]+|t\.me\/|https?:\/\/|\+?[78][-\s]?\(?\d{3}\)?)/i;
             if (forbidden.test(title) || forbidden.test(desc)) {
                 tg.showPopup({
-                    title: 'Внимание',
-                    message: 'В названии и описании нельзя оставлять контакты. Используйте для этого специальное поле "Ваши контакты".',
-                    buttons: [{type: 'ok'}]
+                    title: 'Модерация',
+                    message: 'В описании нельзя использовать ссылки и контакты. Перенесите их в поле "Ваша связь".',
+                    buttons: [{type: 'ok', text: 'Исправить'}]
                 });
                 return;
             }
 
-            const result = {
-                title: title,
-                description: desc,
-                contact: contact
-            };
-
+            const result = { title, description: desc, contact };
             tg.sendData(JSON.stringify(result));
-            tg.close();
+            setTimeout(() => tg.close(), 100);
         };
     </script>
 </body>
-
 </html>
-
-
